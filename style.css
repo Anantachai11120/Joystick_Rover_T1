@@ -182,3 +182,11 @@ button:active, .button:active {
     transform: scale(0.95); /* เอฟเฟกต์ย่อขณะกด */
 }
 
+/* ปิดการเลือกข้อความบนปุ่ม */
+button, .button {
+    -webkit-user-select: none; /* สำหรับ Safari และ iOS */
+    -ms-user-select: none;    /* สำหรับ IE และ Edge */
+    user-select: none;        /* สำหรับเบราว์เซอร์ทั่วไป */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* ปิดการไฮไลต์ขณะกด */
+}
+
