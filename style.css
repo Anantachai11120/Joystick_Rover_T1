@@ -13,7 +13,6 @@ body {
 /* กรอบคอนเทนเนอร์ */
 .container {
     width: 500px;
-    height: 200px;
     background-color: #eaeaea;
     border: 2px solid #000;
     display: flex;
@@ -22,6 +21,7 @@ body {
     justify-content: space-between;
     padding: 20px;
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+    text-align: center;
 }
 
 /* ปิดการเลือกข้อความบนปุ่ม */
@@ -30,6 +30,9 @@ button, .button {
     -ms-user-select: none;    /* สำหรับ IE และ Edge */
     user-select: none;        /* สำหรับเบราว์เซอร์ทั่วไป */
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* ปิดการไฮไลต์ขณะกด */
+    touch-action: manipulation; /* ลดดีเลย์ของการแตะ */
+    outline: none; /* ลบเส้นขอบเมื่อโฟกัส */
+    font-family: inherit; /* ใช้ฟอนต์ของหน้า */
 }
 
 /* ส่วนหัว */
@@ -52,34 +55,7 @@ button, .button {
     color: #28a745; /* สีเขียวเมื่อเชื่อมต่อ (CONNECT) */
 }
 
-.button {
-    position: relative;
-    z-index: 10;
-}
-
-/* กลุ่มปุ่มควบคุม */
-.controls {
-    width: 100%;
-    display: flex;
-    justify-content: space-between;
-    margin-top: 20px;
-}
-
-/* ซ้าย-ขวา */
-.horizontal-controls {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-}
-
-/* บน-ล่าง */
-.vertical-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
-/* ปุ่ม
+/* ปุ่ม */
 .button {
     width: 150px;
     height: 50px;
@@ -90,23 +66,38 @@ button, .button {
     border: none;
     cursor: pointer;
     transition: transform 0.2s ease, background-color 0.2s ease;
-} */
+    border-radius: 5px; /* เพิ่มมุมโค้ง */
+}
 
 .button:hover {
     background-color: #333;
 }
 
 .button:active {
-    transform: scale(0.95);
+    background-color: #00b300; /* สีเขียวเมื่อกด */
+    transform: scale(0.95); /* ลดขนาดเล็กน้อย */
+}
+
+/* กลุ่มปุ่มควบคุม */
+.controls {
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+/* แถวของปุ่ม */
+.row {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
 }
 
 /* โหมดควบคุม */
 .mode-controls {
-    margin-top: -75px;
-    width: 100%; /* กำหนดให้กินพื้นที่เต็มคอนเทนเนอร์ */
+    width: 100%;
     display: flex;
-    justify-content: flex-start; /* ชิดซ้าย */
-    padding-left: 0px; /* เพิ่มระยะห่างจากขอบซ้าย (ถ้าต้องการ) */
+    justify-content: center;
 }
 
 .mode-button {
@@ -119,76 +110,38 @@ button, .button {
     border: none;
     cursor: pointer;
     transition: background-color 0.3s ease;
-}
-
-/* ปุ่มเมื่อสัมผัส */
-.button:active,
-.button:focus {
-    background-color: #00b300; /* สีเขียวเมื่อกด */
-}
-
-/* ปุ่มทั่วไป */
-.button {
-    width: 150px;
-    height: 50px;
-    background-color: #000;
-    color: #fff;
-    font-size: 16px;
-    font-weight: bold;
-    border: none;
-    cursor: pointer;
-    transition: transform 0.2s ease, background-color 0.2s ease;
+    border-radius: 5px;
 }
 
 /* Responsive Design */
 @media (max-width: 768px) {
     .container {
-        width: 100%;
-        height: auto;
+        width: 90%;
         padding: 10px;
         box-sizing: border-box;
     }
 
-    .horizontal-controls, .vertical-controls {
+    .row {
         flex-direction: column; /* ซ้อนปุ่มในแนวตั้งสำหรับหน้าจอแคบ */
         gap: 10px;
     }
 
     .button {
         width: 100%; /* กินพื้นที่เต็มหน้าจอ */
-        margin: 20px 0;
         font-size: 18px;
     }
-
-    .mode-controls {
-        justify-content: center; /* จัดตรงกลาง */
-        margin-top: 10px;
-    }
-}
-/* ปิดเอฟเฟกต์โฮเวอร์และไฮไลต์เมื่อใช้งานบนอุปกรณ์สัมผัส */
-button, .button {
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* ปิดการไฮไลต์ขณะกด */
-    -webkit-user-select: none; /* Safari และ iOS */
-    -ms-user-select: none;    /* IE และ Edge */
-    user-select: none;        /* เบราว์เซอร์ทั่วไป */
-    touch-action: manipulation; /* ลดดีเลย์ของการแตะ */
-    outline: none; /* ลบเส้นขอบเมื่อโฟกัส */
-    border: none; /* ลบเส้นขอบ */
-    font-family: inherit; /* ให้ปุ่มใช้ฟอนต์เดียวกับหน้าหลัก */
-    font-size: inherit; /* ให้ขนาดฟอนต์สอดคล้องกับหน้าหลัก */
 }
 
 /* ปิดการโฮเวอร์สำหรับอุปกรณ์สัมผัส */
 @media (hover: none) {
-    button:hover, .button:hover {
+    .button:hover {
         background-color: inherit; /* ยกเลิกเอฟเฟกต์โฮเวอร์ */
     }
 }
 
-/* ปุ่มเมื่อแตะ (เพิ่มฟีดแบ็คสีและลดขนาดเล็กน้อย) */
+/* ปุ่มเมื่อแตะ */
 button:active, .button:active {
     background-color: #00b300; /* สีเขียวเมื่อกด */
     transform: scale(0.95); /* เอฟเฟกต์ย่อเล็กน้อย */
     transition: transform 0.1s ease;
 }
-
