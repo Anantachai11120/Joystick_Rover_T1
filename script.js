@@ -23,7 +23,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
     client.on("connect", () => {
         console.log("MQTT Connected");
-        statusText.textContent = "MQTT CONNECTED";
+        statusText.textContent = "CONNECTED";
         statusText.style.color = "green";
         client.subscribe("rover/control", (err) => {
             if (err) {
