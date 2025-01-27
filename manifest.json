@@ -1,0 +1,8 @@
+{
+    "name": "Joystick Controller",
+    "short_name": "Joystick",
+    "start_url": "./index.html",
+    "display": "standalone",
+    "theme_color": "#000000",
+    "background_color": "#f4f3f6"
+}

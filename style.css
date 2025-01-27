@@ -1,0 +1,159 @@
+/* พื้นหลังหลัก */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Arial', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    background-color: #f4f3f6;
+}
+
+/* กรอบคอนเทนเนอร์ */
+.container {
+    width: 500px;
+    height: 200px;
+    background-color: #eaeaea;
+    border: 2px solid #000;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
+}
+
+/* ส่วนหัว */
+.header {
+    width: 100%;
+    text-align: center;
+    padding: 10px 0;
+    background-color: #f0f0f0;
+    border-bottom: 2px solid #000;
+}
+
+.connection-status {
+    font-size: 20px;
+    font-weight: bold;
+    margin: 0;
+    color: #dc3545; /* สีแดงเริ่มต้น (DISCONNECT) */
+}
+
+.connection-status.connected {
+    color: #28a745; /* สีเขียวเมื่อเชื่อมต่อ (CONNECT) */
+}
+
+.button {
+    position: relative;
+    z-index: 10;
+}
+
+/* กลุ่มปุ่มควบคุม */
+.controls {
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    margin-top: 20px;
+}
+
+/* ซ้าย-ขวา */
+.horizontal-controls {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+/* บน-ล่าง */
+.vertical-controls {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+/* ปุ่ม
+.button {
+    width: 150px;
+    height: 50px;
+    background-color: #000;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+} */
+
+.button:hover {
+    background-color: #333;
+}
+
+.button:active {
+    transform: scale(0.95);
+}
+
+/* โหมดควบคุม */
+.mode-controls {
+    margin-top: -75px;
+    width: 100%; /* กำหนดให้กินพื้นที่เต็มคอนเทนเนอร์ */
+    display: flex;
+    justify-content: flex-start; /* ชิดซ้าย */
+    padding-left: 0px; /* เพิ่มระยะห่างจากขอบซ้าย (ถ้าต้องการ) */
+}
+
+.mode-button {
+    background-color: #ff0000; /* สีแดงสำหรับ Stop */
+    color: #fff;
+    width: 150px;
+    height: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* ปุ่มเมื่อสัมผัส */
+.button:active,
+.button:focus {
+    background-color: #00b300; /* สีเขียวเมื่อกด */
+}
+
+/* ปุ่มทั่วไป */
+.button {
+    width: 150px;
+    height: 50px;
+    background-color: #000;
+    color: #fff;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.2s ease, background-color 0.2s ease;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .container {
+        width: 100%;
+        height: auto;
+        padding: 10px;
+        box-sizing: border-box;
+    }
+
+    .horizontal-controls, .vertical-controls {
+        flex-direction: column; /* ซ้อนปุ่มในแนวตั้งสำหรับหน้าจอแคบ */
+        gap: 10px;
+    }
+
+    .button {
+        width: 100%; /* กินพื้นที่เต็มหน้าจอ */
+        margin: 5px 0;
+        font-size: 18px;
+    }
+
+    .mode-controls {
+        justify-content: center; /* จัดตรงกลาง */
+        margin-top: 10px;
+    }
+}

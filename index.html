@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Joystick Controller</title>
+    <link rel="stylesheet" href="style.css">
+    <link rel="manifest" href="manifest.json"> <!-- เพิ่ม Web App Manifest -->
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black">
+    <meta name="theme-color" content="#000000">
+    <script src="https://unpkg.com/mqtt/dist/mqtt.min.js"></script> <!-- เพิ่ม MQTT.js -->
+</head>
+<body>
+    <div class="container">
+        <!-- สถานะการเชื่อมต่อ -->
+        <div class="header">
+            <h1 id="connection-status" class="connection-status">DIS CONNECT</h1>
+        </div>
+
+        <!-- พื้นที่ปุ่มควบคุม -->
+        <div class="controls">
+            <!-- ซ้าย-ขวา -->
+            <div class="horizontal-controls">
+                <button class="button" id="left">Left</button>
+                <button class="button" id="right">Right</button>
+            </div>
+
+            <!-- บน-ล่าง -->
+            <div class="vertical-controls">
+                <button class="button" id="up">Forward</button>
+                <button class="button" id="down">Backward</button>
+            </div>            
+        </div>
+
+        <!-- ปุ่มควบคุมโหมด -->
+        <div class="mode-controls">
+            <button class="button mode-button" id="toggle-mode">Stop</button>
+        </div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
