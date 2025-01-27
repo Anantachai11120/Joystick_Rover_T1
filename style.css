@@ -157,3 +157,28 @@ body {
         margin-top: 10px;
     }
 }
+/* ปิดเอฟเฟกต์โฮเวอร์เมื่อใช้งานบนอุปกรณ์สัมผัส */
+button, .button {
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* ปิดการไฮไลต์ขณะกด */
+    outline: none; /* ลบเส้นขอบเมื่อโฟกัส */
+    border: none; /* ลบเส้นขอบของปุ่ม */
+    touch-action: manipulation; /* ลดดีเลย์ของการแตะ */
+}
+
+button:hover, .button:hover {
+    background-color: #333; /* โฮเวอร์ (เฉพาะบนเดสก์ท็อป) */
+}
+
+/* ปิดเอฟเฟกต์ hover บนอุปกรณ์สัมผัส */
+@media (hover: none) {
+    button:hover, .button:hover {
+        background-color: inherit; /* ยกเลิกเอฟเฟกต์โฮเวอร์ */
+    }
+}
+
+/* ปุ่มเมื่อแตะ (เพิ่มฟีดแบ็คสี) */
+button:active, .button:active {
+    background-color: #00b300; /* สีเขียวเมื่อกด */
+    transform: scale(0.95); /* เอฟเฟกต์ย่อขณะกด */
+}
+
