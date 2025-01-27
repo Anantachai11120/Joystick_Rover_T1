@@ -151,7 +151,7 @@ button, .button {
 
     .horizontal-controls, .vertical-controls {
         flex-direction: column; /* ซ้อนปุ่มในแนวตั้งสำหรับหน้าจอแคบ */
-        gap: 10px;
+        gap: 30px;
     }
 
     .button {
