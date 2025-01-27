@@ -24,6 +24,14 @@ body {
     box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.1);
 }
 
+/* ปิดการเลือกข้อความบนปุ่ม */
+button, .button {
+    -webkit-user-select: none; /* สำหรับ Safari และ iOS */
+    -ms-user-select: none;    /* สำหรับ IE และ Edge */
+    user-select: none;        /* สำหรับเบราว์เซอร์ทั่วไป */
+    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* ปิดการไฮไลต์ขณะกด */
+}
+
 /* ส่วนหัว */
 .header {
     width: 100%;
@@ -157,36 +165,30 @@ body {
         margin-top: 10px;
     }
 }
-/* ปิดเอฟเฟกต์โฮเวอร์เมื่อใช้งานบนอุปกรณ์สัมผัส */
+/* ปิดเอฟเฟกต์โฮเวอร์และไฮไลต์เมื่อใช้งานบนอุปกรณ์สัมผัส */
 button, .button {
     -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* ปิดการไฮไลต์ขณะกด */
-    outline: none; /* ลบเส้นขอบเมื่อโฟกัส */
-    border: none; /* ลบเส้นขอบของปุ่ม */
+    -webkit-user-select: none; /* Safari และ iOS */
+    -ms-user-select: none;    /* IE และ Edge */
+    user-select: none;        /* เบราว์เซอร์ทั่วไป */
     touch-action: manipulation; /* ลดดีเลย์ของการแตะ */
+    outline: none; /* ลบเส้นขอบเมื่อโฟกัส */
+    border: none; /* ลบเส้นขอบ */
+    font-family: inherit; /* ให้ปุ่มใช้ฟอนต์เดียวกับหน้าหลัก */
+    font-size: inherit; /* ให้ขนาดฟอนต์สอดคล้องกับหน้าหลัก */
 }
 
-button:hover, .button:hover {
-    background-color: #333; /* โฮเวอร์ (เฉพาะบนเดสก์ท็อป) */
-}
-
-/* ปิดเอฟเฟกต์ hover บนอุปกรณ์สัมผัส */
+/* ปิดการโฮเวอร์สำหรับอุปกรณ์สัมผัส */
 @media (hover: none) {
     button:hover, .button:hover {
         background-color: inherit; /* ยกเลิกเอฟเฟกต์โฮเวอร์ */
     }
 }
 
-/* ปุ่มเมื่อแตะ (เพิ่มฟีดแบ็คสี) */
+/* ปุ่มเมื่อแตะ (เพิ่มฟีดแบ็คสีและลดขนาดเล็กน้อย) */
 button:active, .button:active {
     background-color: #00b300; /* สีเขียวเมื่อกด */
-    transform: scale(0.95); /* เอฟเฟกต์ย่อขณะกด */
-}
-
-/* ปิดการเลือกข้อความบนปุ่ม */
-button, .button {
-    -webkit-user-select: none; /* สำหรับ Safari และ iOS */
-    -ms-user-select: none;    /* สำหรับ IE และ Edge */
-    user-select: none;        /* สำหรับเบราว์เซอร์ทั่วไป */
-    -webkit-tap-highlight-color: rgba(0, 0, 0, 0); /* ปิดการไฮไลต์ขณะกด */
+    transform: scale(0.95); /* เอฟเฟกต์ย่อเล็กน้อย */
+    transition: transform 0.1s ease;
 }
 
