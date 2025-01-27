@@ -157,7 +157,7 @@ button, .button {
     .button {
         width: 100%; /* กินพื้นที่เต็มหน้าจอ */
         margin: 20px 0;
-        font-size: 18px;
+        font-size: 50px;
     }
 
     .mode-controls {
