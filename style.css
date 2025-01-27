@@ -141,7 +141,7 @@ button, .button {
 }
 
 /* Responsive Design */
-@media (max-width: 768px) {
+@media (max-width: 500px) {
     .container {
         width: 100%;
         height: auto;
