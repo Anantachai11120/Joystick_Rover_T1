@@ -3,7 +3,7 @@ document.addEventListener("DOMContentLoaded", () => {
         forward: document.getElementById("forward"),
         left: document.getElementById("left"),
         right: document.getElementById("right"),
-        down: document.getElementById("down"),
+        backward: document.getElementById("backward"),
     };
 
     const statusText = document.getElementById("connection-status");
