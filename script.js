@@ -37,13 +37,16 @@ document.addEventListener("DOMContentLoaded", () => {
     });
 
     // ฟังก์ชันส่งคำสั่ง MQTT ในรูปแบบ JSON
-    function publishControlState() {
-        if (JSON.stringify(controlState) !== JSON.stringify(lastPublishedState)) {
-            console.log(`[DEBUG] Publishing: ${JSON.stringify(controlState)}`);
-            client.publish("rover/autonomous/control", JSON.stringify(controlState));
-            lastPublishedState = { ...controlState }; // บันทึกสถานะล่าสุด
-        }
+// ฟังก์ชันส่งคำสั่ง MQTT ในรูปแบบ JSON
+function publishControlState() {
+    if (JSON.stringify(controlState) !== JSON.stringify(lastPublishedState)) {
+        const formattedJSON = JSON.stringify(controlState, null, 4); // จัดรูปแบบ JSON
+        console.log(`[DEBUG] Publishing to Topic "rover/joystick":\n${formattedJSON}`);
+        // ส่งข้อมูล JSON ไปยัง Topic rover/joystick
+        client.publish("rover/joystick", formattedJSON);
+        lastPublishedState = { ...controlState }; // บันทึกสถานะล่าสุด
     }
+}
 
     // ฟังก์ชันเริ่มเคลื่อนไหว
     function startMoving(direction) {
@@ -64,8 +67,9 @@ document.addEventListener("DOMContentLoaded", () => {
         // ส่งซ้ำเมื่อกดค้าง
         if (!activeInterval) {
             activeInterval = setInterval(() => {
-                client.publish("rover/autonomous/control", JSON.stringify(controlState));
-                console.log(`[DEBUG] Repeating: ${JSON.stringify(controlState)}`);
+                const formattedJSON = JSON.stringify(controlState, null, 4); // จัดรูปแบบ JSON
+                client.publish("rover/joystick", formattedJSON);
+                console.log(`[DEBUG] Repeating:\n${formattedJSON}`);
             }, 100); // ส่งซ้ำทุก 100ms
         }
     }
