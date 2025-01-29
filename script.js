@@ -14,24 +14,20 @@ document.addEventListener("DOMContentLoaded", () => {
 
     let gamepadIndex = null;
     let isStopped = true; // เริ่มต้นในโหมด Stop
-    let isModeToggled = false; // ใช้สำหรับตรวจจับปุ่ม Toggle Mode
-    const activeIntervals = {}; // เก็บ Intervals ของปุ่มที่ถูกกด
-    const pressedButtons = {}; // เก็บสถานะการกดของปุ่ม Gamepad
+    let activeInterval = null; // ใช้สำหรับควบคุมการส่งซ้ำ
+    let controlState = { forward: 0, backward: 0, left: 0, right: 0 }; // เก็บสถานะการเคลื่อนไหว
+    let lastPublishedState = { ...controlState }; // เก็บสถานะล่าสุดที่ส่งออกไป
 
     // เชื่อมต่อ MQTT Broker
-    const client = mqtt.connect("wss://mqtt.eclipseprojects.io:443/mqtt");
+    const client = mqtt.connect("wss://mqttlocal.roverautonomous.com:443/mqtt", {
+        username: "rover",
+        password: "rover",
+    });
 
     client.on("connect", () => {
         console.log("MQTT Connected");
-        statusText.textContent = "CONNECTED";
+        statusText.textContent = "MQTT CONNECTED";
         statusText.style.color = "green";
-        client.subscribe("rover/control", (err) => {
-            if (err) {
-                console.error("Failed to subscribe:", err);
-            } else {
-                console.log("Subscribed to topic: rover/control");
-            }
-        });
     });
 
     client.on("error", (err) => {
@@ -40,66 +36,92 @@ document.addEventListener("DOMContentLoaded", () => {
         statusText.style.color = "red";
     });
 
-    // ฟังก์ชันสลับโหมด
-    function toggleMode() {
-        isStopped = !isStopped;
-        const mode = isStopped ? "STOP" : "START";
-        toggleModeButton.textContent = mode;
-        toggleModeButton.style.backgroundColor = isStopped ? "#ff0000" : "#00acff";
-        client.publish("rover/control", mode);
-        console.log(`[MQTT] Published: ${mode}`);
+    // ฟังก์ชันส่งคำสั่ง MQTT ในรูปแบบ JSON
+    function publishControlState() {
+        if (JSON.stringify(controlState) !== JSON.stringify(lastPublishedState)) {
+            console.log(`[DEBUG] Publishing: ${JSON.stringify(controlState)}`);
+            client.publish("rover/autonomous/control", JSON.stringify(controlState));
+            lastPublishedState = { ...controlState }; // บันทึกสถานะล่าสุด
+        }
     }
 
-    // ฟังก์ชันเริ่มเคลื่อนที่แบบต่อเนื่อง
+    // ฟังก์ชันเริ่มเคลื่อนไหว
     function startMoving(direction) {
         if (isStopped) {
             console.log("Cannot move while in Stop mode!");
             return;
         }
 
-        // เริ่มส่งคำสั่งแบบต่อเนื่องถ้ายังไม่มี Interval สำหรับปุ่มนี้
-        if (!activeIntervals[direction]) {
-            activeIntervals[direction] = setInterval(() => {
-                client.publish("rover/control", direction.toUpperCase());
-                console.log(`[MQTT] Published: ${direction.toUpperCase()}`);
-            }, 100); // ส่งคำสั่งทุก 100ms
+        // ตั้งค่า controlState
+        const updatedState = { forward: 0, backward: 0, left: 0, right: 0 };
+        updatedState[direction] = 1;
+
+        if (JSON.stringify(controlState) !== JSON.stringify(updatedState)) {
+            controlState = updatedState;
+            publishControlState(); // ส่งคำสั่งเริ่มต้น
+        }
+
+        // ส่งซ้ำเมื่อกดค้าง
+        if (!activeInterval) {
+            activeInterval = setInterval(() => {
+                client.publish("rover/autonomous/control", JSON.stringify(controlState));
+                console.log(`[DEBUG] Repeating: ${JSON.stringify(controlState)}`);
+            }, 100); // ส่งซ้ำทุก 100ms
         }
     }
 
-    // ฟังก์ชันหยุดการเคลื่อนที่ (ส่งคำสั่ง STOP)
-    function stopMoving(direction) {
-        if (activeIntervals[direction]) {
-            clearInterval(activeIntervals[direction]); // หยุด Interval
-            delete activeIntervals[direction]; // ลบออกจาก activeIntervals
+    // ฟังก์ชันหยุดเคลื่อนไหว
+    function stopMoving() {
+        const updatedState = { forward: 0, backward: 0, left: 0, right: 0 };
+
+        if (JSON.stringify(controlState) !== JSON.stringify(updatedState)) {
+            controlState = updatedState;
+            publishControlState();
         }
 
-        // ส่งคำสั่ง STOP ทุกครั้งเมื่อปล่อยปุ่ม
-        client.publish("rover/control", "STOP");
-        console.log(`[MQTT] Published: STOP`);
+        // หยุดส่งซ้ำ
+        if (activeInterval) {
+            clearInterval(activeInterval);
+            activeInterval = null;
+        }
+    }
+
+    // ฟังก์ชันสลับโหมด
+    function toggleMode() {
+        isStopped = !isStopped;
+        const mode = isStopped ? "STOP" : "START";
+        toggleModeButton.textContent = mode;
+        toggleModeButton.style.backgroundColor = isStopped ? "#ff0000" : "#00acff";
+        console.log(`[MQTT] Mode: ${mode}`);
+        stopMoving(); // หยุดการส่งคำสั่งเมื่อเปลี่ยนโหมด
     }
 
     // เปิดใช้งานปุ่มควบคุม
     function enableButtonControls() {
         Object.keys(buttons).forEach((key) => {
             const button = buttons[key];
-    
-            const startEvent = () => {
+
+            button.addEventListener("mousedown", () => {
                 startMoving(key);
-                button.style.backgroundColor = "#00b300"; // เปลี่ยนสีปุ่มเมื่อกด
-            };
-    
-            const endEvent = () => {
-                stopMoving(key);
-                button.style.backgroundColor = "#000000"; // กลับไปสีเริ่มต้นเมื่อปล่อยปุ่ม
-            };
-    
-            // เพิ่ม Event Listeners ให้กับปุ่ม
-            button.addEventListener("mousedown", startEvent);
-            button.addEventListener("mouseup", endEvent);
-            button.addEventListener("touchstart", startEvent, { passive: true });
-            button.addEventListener("touchend", endEvent, { passive: true });
+                button.style.backgroundColor = "#00b300";
+            });
+
+            button.addEventListener("mouseup", () => {
+                stopMoving();
+                button.style.backgroundColor = "#000000";
+            });
+
+            button.addEventListener("touchstart", () => {
+                startMoving(key);
+                button.style.backgroundColor = "#00b300";
+            }, { passive: true });
+
+            button.addEventListener("touchend", () => {
+                stopMoving();
+                button.style.backgroundColor = "#000000";
+            }, { passive: true });
         });
-    }   
+    }
 
     // ตรวจจับการเชื่อมต่อ Gamepad
     window.addEventListener("gamepadconnected", (event) => {
@@ -124,66 +146,18 @@ document.addEventListener("DOMContentLoaded", () => {
             const gamepad = gamepads[gamepadIndex];
 
             if (gamepad) {
-                // ปุ่ม Forward
-                if (gamepad.buttons[3]?.pressed) {
-                    if (!pressedButtons["up"]) {
-                        startMoving("up");
-                        buttons.up.style.backgroundColor = "#00b300";
-                        pressedButtons["up"] = true;
-                    }
-                } else if (pressedButtons["up"]) {
-                    stopMoving("up");
-                    buttons.up.style.backgroundColor = "#000000";
-                    pressedButtons["up"] = false;
+                const newControlState = { forward: 0, backward: 0, left: 0, right: 0 };
+
+                if (!isStopped) {
+                    if (gamepad.buttons[3]?.pressed) newControlState.forward = 1;
+                    else if (gamepad.buttons[0]?.pressed) newControlState.backward = 1;
+                    else if (gamepad.buttons[14]?.pressed) newControlState.left = 1;
+                    else if (gamepad.buttons[15]?.pressed) newControlState.right = 1;
                 }
 
-                // ปุ่ม Backward
-                if (gamepad.buttons[0]?.pressed) {
-                    if (!pressedButtons["down"]) {
-                        startMoving("down");
-                        buttons.down.style.backgroundColor = "#00b300";
-                        pressedButtons["down"] = true;
-                    }
-                } else if (pressedButtons["down"]) {
-                    stopMoving("down");
-                    buttons.down.style.backgroundColor = "#000000";
-                    pressedButtons["down"] = false;
-                }
-
-                // ปุ่ม Left
-                if (gamepad.buttons[14]?.pressed) {
-                    if (!pressedButtons["left"]) {
-                        startMoving("left");
-                        buttons.left.style.backgroundColor = "#00b300";
-                        pressedButtons["left"] = true;
-                    }
-                } else if (pressedButtons["left"]) {
-                    stopMoving("left");
-                    buttons.left.style.backgroundColor = "#000000";
-                    pressedButtons["left"] = false;
-                }
-
-                // ปุ่ม Right
-                if (gamepad.buttons[15]?.pressed) {
-                    if (!pressedButtons["right"]) {
-                        startMoving("right");
-                        buttons.right.style.backgroundColor = "#00b300";
-                        pressedButtons["right"] = true;
-                    }
-                } else if (pressedButtons["right"]) {
-                    stopMoving("right");
-                    buttons.right.style.backgroundColor = "#000000";
-                    pressedButtons["right"] = false;
-                }
-
-                // ปุ่ม Toggle Mode
-                if (gamepad.buttons[1]?.pressed) {
-                    if (!isModeToggled) {
-                        toggleMode();
-                        isModeToggled = true;
-                    }
-                } else {
-                    isModeToggled = false;
+                if (JSON.stringify(controlState) !== JSON.stringify(newControlState)) {
+                    controlState = newControlState;
+                    publishControlState();
                 }
             }
         }
@@ -195,15 +169,6 @@ document.addEventListener("DOMContentLoaded", () => {
 
     // เปิดใช้งานปุ่ม UI
     enableButtonControls();
-
-    // ลงทะเบียน Service Worker
-    if ("serviceWorker" in navigator) {
-        navigator.serviceWorker.register("sw.js").then(() => {
-            console.log("Service Worker Registered");
-        }).catch((err) => {
-            console.error("Service Worker Registration Failed:", err);
-        });
-    }
 
     // เริ่มตรวจจับ Gamepad
     pollGamepad();
