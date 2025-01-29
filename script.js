@@ -1,6 +1,6 @@
 document.addEventListener("DOMContentLoaded", () => {
     const buttons = {
-        up: document.getElementById("up"),
+        forward: document.getElementById("forward"),
         left: document.getElementById("left"),
         right: document.getElementById("right"),
         down: document.getElementById("down"),
