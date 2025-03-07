@@ -191,3 +191,44 @@ button:active, .button:active {
     transform: scale(0.95); /* เอฟเฟกต์ย่อเล็กน้อย */
     transition: transform 0.1s ease;
 }
+
+/* ปุ่ม Auto/Manual */
+#auto-mode {
+    background-color: #000;
+    color: #fff;
+    width: 120px;
+    height: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+#manual-mode {
+    background-color: #000;
+    color: #fff;
+    width: 120px;
+    height: 50px;
+    font-size: 16px;
+    font-weight: bold;
+    border: none;
+    cursor: pointer;
+    transition: background-color 0.3s ease;
+}
+
+/* ปุ่ม Auto Active */
+#auto-mode.active {
+    background-color: #007bff; /* สีฟ้า */
+}
+
+/* ปุ่ม Manual Active */
+#manual-mode.active {
+    background-color: #28a745; /* สีเขียว */
+}
+
+/* ปิดการใช้งานปุ่มควบคุม */
+.controls .button:disabled {
+    background-color: #888;
+    cursor: not-allowed;
+}
