@@ -112,7 +112,7 @@ function toggleAutoManualMode() {
         disableControlButtons();
         console.log("[MQTT] Switching to AUTO mode");
         
-        const message = "auto"; // ข้อความที่ต้องการส่ง
+        const message = '"auto"'; // ข้อความที่ต้องการส่ง
         client.publish("rover/statusauto", message);
         console.log(`[DEBUG] Published to "rover/statusauto": ${message}`); // ✅ แสดงในคอนโซล
     } else {
@@ -121,7 +121,7 @@ function toggleAutoManualMode() {
         enableControlButtons();
         console.log("[MQTT] Switching to MANUAL mode");
 
-        const message = "manual"; // ข้อความที่ต้องการส่ง
+        const message = '"manual"'; // ข้อความที่ต้องการส่ง
         client.publish("rover/statusauto", message);
         console.log(`[DEBUG] Published to "rover/statusauto": ${message}`); // ✅ แสดงในคอนโซล
     }
