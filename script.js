@@ -8,15 +8,17 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const statusText = document.getElementById("connection-status");
     const toggleModeButton = document.getElementById("toggle-mode");
+    const toggleAutoManualButton = document.getElementById("toggle-auto-manual"); // ปุ่ม Auto/Manual
 
     statusText.textContent = "DISCONNECT";
     statusText.style.color = "red";
 
     let gamepadIndex = null;
-    let isStopped = true; // เริ่มต้นในโหมด Stop
-    let activeInterval = null; // ใช้สำหรับควบคุมการส่งซ้ำ
-    let controlState = { forward: 0, backward: 0, left: 0, right: 0 }; // เก็บสถานะการเคลื่อนไหว
-    let lastPublishedState = { ...controlState }; // เก็บสถานะล่าสุดที่ส่งออกไป
+    let isStopped = true;
+    let isAutoMode = false; // เริ่มต้นเป็น Manual Mode
+    let activeInterval = null;
+    let controlState = { forward: 0, backward: 0, left: 0, right: 0 };
+    let lastPublishedState = { ...controlState };
 
     // เชื่อมต่อ MQTT Broker
     const client = mqtt.connect("wss://mqttlocal.roverautonomous.com:443/mqtt", {
@@ -36,41 +38,37 @@ document.addEventListener("DOMContentLoaded", () => {
         statusText.style.color = "red";
     });
 
-    // ฟังก์ชันส่งคำสั่ง MQTT ในรูปแบบ JSON
-// ฟังก์ชันส่งคำสั่ง MQTT ในรูปแบบ JSON
-function publishControlState() {
-    if (JSON.stringify(controlState) !== JSON.stringify(lastPublishedState)) {
-        const formattedJSON = JSON.stringify(controlState, null, 4); // จัดรูปแบบ JSON
-        console.log(`[DEBUG] Publishing to Topic "rover/joystick":\n${formattedJSON}`);
-        // ส่งข้อมูล JSON ไปยัง Topic rover/joystick
-        client.publish("rover/joystick", formattedJSON);
-        lastPublishedState = { ...controlState }; // บันทึกสถานะล่าสุด
+    // ฟังก์ชันส่งคำสั่ง MQTT
+    function publishControlState() {
+        if (JSON.stringify(controlState) !== JSON.stringify(lastPublishedState)) {
+            const formattedJSON = JSON.stringify(controlState, null, 4);
+            console.log(`[DEBUG] Publishing to Topic "rover/joystick":\n${formattedJSON}`);
+            client.publish("rover/joystick", formattedJSON);
+            lastPublishedState = { ...controlState };
+        }
     }
-}
 
     // ฟังก์ชันเริ่มเคลื่อนไหว
     function startMoving(direction) {
-        if (isStopped) {
-            console.log("Cannot move while in Stop mode!");
+        if (isStopped || isAutoMode) {
+            console.log("Cannot move while in Stop mode or Auto mode!");
             return;
         }
 
-        // ตั้งค่า controlState
         const updatedState = { forward: 0, backward: 0, left: 0, right: 0 };
         updatedState[direction] = 1;
 
         if (JSON.stringify(controlState) !== JSON.stringify(updatedState)) {
             controlState = updatedState;
-            publishControlState(); // ส่งคำสั่งเริ่มต้น
+            publishControlState();
         }
 
-        // ส่งซ้ำเมื่อกดค้าง
         if (!activeInterval) {
             activeInterval = setInterval(() => {
-                const formattedJSON = JSON.stringify(controlState, null, 4); // จัดรูปแบบ JSON
+                const formattedJSON = JSON.stringify(controlState, null, 4);
                 client.publish("rover/joystick", formattedJSON);
                 console.log(`[DEBUG] Repeating:\n${formattedJSON}`);
-            }, 100); // ส่งซ้ำทุก 100ms
+            }, 100);
         }
     }
 
@@ -83,21 +81,66 @@ function publishControlState() {
             publishControlState();
         }
 
-        // หยุดส่งซ้ำ
         if (activeInterval) {
             clearInterval(activeInterval);
             activeInterval = null;
         }
     }
 
-    // ฟังก์ชันสลับโหมด
+    // ฟังก์ชันสลับโหมด Stop/Start
     function toggleMode() {
+        if (isAutoMode) {
+            console.log("Cannot toggle mode while in Auto mode!");
+            return;
+        }
+
         isStopped = !isStopped;
         const mode = isStopped ? "STOP" : "START";
         toggleModeButton.textContent = mode;
         toggleModeButton.style.backgroundColor = isStopped ? "#ff0000" : "#00acff";
         console.log(`[MQTT] Mode: ${mode}`);
-        stopMoving(); // หยุดการส่งคำสั่งเมื่อเปลี่ยนโหมด
+        stopMoving();
+    }
+
+    // ฟังก์ชันสลับโหมด Auto/Manual
+function toggleAutoManualMode() {
+    isAutoMode = !isAutoMode;
+
+    if (isAutoMode) {
+        toggleAutoManualButton.textContent = "AUTO";
+        toggleAutoManualButton.style.backgroundColor = "#007bff"; // สีฟ้า
+        disableControlButtons();
+        console.log("[MQTT] Switching to AUTO mode");
+        
+        const message = "auto"; // ข้อความที่ต้องการส่ง
+        client.publish("rover/statusauto", message);
+        console.log(`[DEBUG] Published to "rover/statusauto": ${message}`); // ✅ แสดงในคอนโซล
+    } else {
+        toggleAutoManualButton.textContent = "MANUAL";
+        toggleAutoManualButton.style.backgroundColor = "#28a745"; // สีเขียว
+        enableControlButtons();
+        console.log("[MQTT] Switching to MANUAL mode");
+
+        const message = "manual"; // ข้อความที่ต้องการส่ง
+        client.publish("rover/statusauto", message);
+        console.log(`[DEBUG] Published to "rover/statusauto": ${message}`); // ✅ แสดงในคอนโซล
+    }
+}
+
+    // ปิดการใช้งานปุ่มควบคุม
+    function disableControlButtons() {
+        Object.values(buttons).forEach(button => {
+            button.disabled = true;
+            button.style.opacity = "0.5";
+        });
+    }
+
+    // เปิดการใช้งานปุ่มควบคุม
+    function enableControlButtons() {
+        Object.values(buttons).forEach(button => {
+            button.disabled = false;
+            button.style.opacity = "1";
+        });
     }
 
     // เปิดใช้งานปุ่มควบคุม
@@ -143,37 +186,9 @@ function publishControlState() {
         console.log("Gamepad disconnected");
     });
 
-    // ตรวจจับการกดปุ่ม Gamepad
-    function pollGamepad() {
-        const gamepads = navigator.getGamepads();
-        if (gamepadIndex !== null && gamepads[gamepadIndex]) {
-            const gamepad = gamepads[gamepadIndex];
-
-            if (gamepad) {
-                const newControlState = { forward: 0, backward: 0, left: 0, right: 0 };
-
-                if (!isStopped) {
-                    if (gamepad.buttons[3]?.pressed) newControlState.forward = 1;
-                    else if (gamepad.buttons[0]?.pressed) newControlState.backward = 1;
-                    else if (gamepad.buttons[14]?.pressed) newControlState.left = 1;
-                    else if (gamepad.buttons[15]?.pressed) newControlState.right = 1;
-                }
-
-                if (JSON.stringify(controlState) !== JSON.stringify(newControlState)) {
-                    controlState = newControlState;
-                    publishControlState();
-                }
-            }
-        }
-        requestAnimationFrame(pollGamepad);
-    }
-
-    // เพิ่ม Event Listener ให้ปุ่มใน UI
+    // เพิ่ม Event Listener ให้ปุ่ม
     toggleModeButton.addEventListener("click", toggleMode);
+    toggleAutoManualButton.addEventListener("click", toggleAutoManualMode);
 
-    // เปิดใช้งานปุ่ม UI
     enableButtonControls();
-
-    // เริ่มตรวจจับ Gamepad
-    pollGamepad();
 });
